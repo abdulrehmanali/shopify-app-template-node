@@ -1,3 +1,27 @@
-# This file stores configurations for your Shopify app.
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-scopes = "write_products"
+name = "mobile-app"
+client_id = "e8e546f83ef1c566573cffb5e927f89e"
+application_url = "https://reasonable-revolutionary-cd-inexpensive.trycloudflare.com"
+embedded = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_product_listings,read_discounts,read_orders,write_orders,read_products,unauthenticated_write_customers"
+
+[auth]
+redirect_urls = [
+  "https://reasonable-revolutionary-cd-inexpensive.trycloudflare.com/auth/callback",
+  "https://reasonable-revolutionary-cd-inexpensive.trycloudflare.com/auth/shopify/callback",
+  "https://reasonable-revolutionary-cd-inexpensive.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2023-10"
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "testingproductcustomizer.myshopify.com"

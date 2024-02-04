@@ -130,7 +130,7 @@ cd web/frontend/ && SHOPIFY_API_KEY=REPLACE_ME yarn build
 Using npm:
 
 ```shell
-cd web/frontend/ && SHOPIFY_API_KEY=REPLACE_ME npm run build
+cd web/frontend/ && SHOPIFY_API_KEY=4f0de337e02c3938d33879f1634e69c6 npm run build
 ```
 
 Using pnpm:
