@@ -82,5 +82,5 @@ export default {
       //   "shop_domain": "{shop}.myshopify.com"
       // }
     },
-  },
+  }
 };

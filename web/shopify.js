@@ -38,8 +38,9 @@ if (process.env.NODE_ENV == 'production') {
   shopify_config.api.apiSecretKey = process.env.SHOPIFY_API_SECRET
   shopify_config.api.scopes = process.env.SHOPIFY_SCOPE.split(',')
   shopify_config.api.hostName = process.env.API_SERVER
-  shopify_config.api.apiVersion = process.env.SHOPIFY_API_VERSION
 }
+shopify_config.api.apiVersion = process.env.SHOPIFY_API_VERSION
+
 
 const shopify = shopifyApp(shopify_config);
 

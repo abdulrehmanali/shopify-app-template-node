@@ -9,14 +9,15 @@
     "dev": "shopify app dev",
     "info": "shopify app info",
     "generate": "shopify app generate",
-    "deploy": "shopify app deploy"
+    "deploy": "shopify app deploy",
+    "push": "shopify app config push"
   },
   "dependencies": {
-    "@shopify/app": "^3.0.0",
-    "@shopify/cli": "^3.0.0",
+    "@shopify/app": "^3.55.4",
+    "@shopify/cli": "^3.55.4",
     "@shopify/shopify-app-session-storage": "^2.0.3",
     "@shopify/shopify-app-session-storage-mysql": "^2.0.3",
-    "axios": "^1.6.3",
+    "axios": "^1.7.2",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

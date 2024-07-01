@@ -1,27 +1,28 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-name = "mobile-app"
 client_id = "e8e546f83ef1c566573cffb5e927f89e"
-application_url = "https://reasonable-revolutionary-cd-inexpensive.trycloudflare.com"
+name = "mobile-app"
+application_url = "https://dialogue-dans-annie-abu.trycloudflare.com"
 embedded = true
-
-[access_scopes]
-# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_product_listings,read_discounts,read_orders,write_orders,read_products,unauthenticated_write_customers"
-
-[auth]
-redirect_urls = [
-  "https://reasonable-revolutionary-cd-inexpensive.trycloudflare.com/auth/callback",
-  "https://reasonable-revolutionary-cd-inexpensive.trycloudflare.com/auth/shopify/callback",
-  "https://reasonable-revolutionary-cd-inexpensive.trycloudflare.com/api/auth/callback"
-]
-
-[webhooks]
-api_version = "2023-10"
-
-[pos]
-embedded = false
 
 [build]
 automatically_update_urls_on_dev = true
 dev_store_url = "testingproductcustomizer.myshopify.com"
+include_config_on_deploy = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_checkouts,read_discounts,read_draft_orders,read_orders,read_product_listings,read_products,unauthenticated_write_customers,write_checkouts,write_customers,write_discounts,write_draft_orders,write_orders"
+
+[auth]
+redirect_urls = [
+  "https://dialogue-dans-annie-abu.trycloudflare.com/auth/callback",
+  "https://dialogue-dans-annie-abu.trycloudflare.com/auth/shopify/callback",
+  "https://dialogue-dans-annie-abu.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-04"
+
+[pos]
+embedded = false

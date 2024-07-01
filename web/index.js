@@ -8,10 +8,10 @@ import cors from 'cors';
 import 'dotenv/config'
 
 import shopify from "./shopify.js";
-import productCreator from "./product-creator.js";
 import PrivacyWebhookHandlers from "./privacy.js";
 import AppRoutes from "./backend/routes/App.js";
 import AdminApi from "./backend/routes/AdminApi.js";
+import Webhooks from "./backend/routes/Webhooks.js";
 
 import db from './backend/Database/index.js'
 
@@ -37,11 +37,17 @@ db.sequelize
   })
 db.ShopStoreFrontToken.sync({ alter: true })
   .then(() => {
-    console.log('Synced Shop Settings Table.')
+    console.log('Synced ShopStoreFrontToken Table.')
   })
   .catch((err) => {
     console.log('Failed to sync Shop Settings Table: ' + err.message)
   })
+
+db.WalletTransactions.sync({ alter: true }).then(() => {
+  console.log('Synced WalletTransactions Table.')
+}).catch((err) => {
+  console.log('Failed to sync Shop Settings Table: ' + err.message)
+})
 
 app.use(cors())
 app.get('/install/', async (req,res) => {
@@ -61,16 +67,31 @@ return;
 
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
+// app.get(
+//   shopify.config.auth.callbackPath,
+//   shopify.auth.callback(),
+//   shopify.redirectToShopifyOrAppRoot()
+// );
 app.get(
   shopify.config.auth.callbackPath,
   shopify.auth.callback(),
-  shopify.redirectToShopifyOrAppRoot()
+  async (req, res)=>{
+    const session = res.locals.shopify.session
+    const webhook = new shopify.api.rest.Webhook({session});
+    webhook.topic = "order_transactions/create";
+    webhook.address = process.env.HOST+'/webhooks/order_transactions/create';
+    webhook.format = "json";
+    await webhook.save({
+      update: true,
+    });
+  }
 );
 app.post(
   shopify.config.webhooks.path,
   shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
 );
 
+app.use('/webhooks', Webhooks)
 
 // If you are adding routes outside of the /api path, remember to
 // also add a proxy rule for them in web/frontend/vite.config.js
