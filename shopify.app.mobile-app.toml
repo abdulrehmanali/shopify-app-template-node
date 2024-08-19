@@ -2,7 +2,8 @@
 
 client_id = "e8e546f83ef1c566573cffb5e927f89e"
 name = "mobile-app"
-application_url = "https://forestry-indianapolis-harvest-parker.trycloudflare.com"
+handle = "mobile-app-16"
+application_url = "https://protocol-css-conditional-extraordinary.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +17,9 @@ scopes = "read_checkouts,read_discounts,read_draft_orders,read_orders,read_produ
 
 [auth]
 redirect_urls = [
-  "https://forestry-indianapolis-harvest-parker.trycloudflare.com/auth/callback",
-  "https://forestry-indianapolis-harvest-parker.trycloudflare.com/auth/shopify/callback",
-  "https://forestry-indianapolis-harvest-parker.trycloudflare.com/api/auth/callback"
+  "https://protocol-css-conditional-extraordinary.trycloudflare.com/auth/callback",
+  "https://protocol-css-conditional-extraordinary.trycloudflare.com/auth/shopify/callback",
+  "https://protocol-css-conditional-extraordinary.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

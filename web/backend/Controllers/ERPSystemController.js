@@ -19,5 +19,6 @@ export const insertCustomerInERP = (firstname, lastname, mobile, email) => {
   url += "&lastname="+lastname;
   url += "&mobile="+mobile;
   url += "&email="+email;
+  console.log(url)
   return axios.post(url)
 }

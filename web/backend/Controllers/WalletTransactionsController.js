@@ -299,6 +299,7 @@ export const appWalletRequestWithdrawal = async (req, res) => {
         query: `mutation discountCodeBasicCreate($basicCodeDiscount: DiscountCodeBasicInput!) {
             discountCodeBasicCreate(basicCodeDiscount: $basicCodeDiscount) {
               codeDiscountNode {
+                id
                 codeDiscount {
                   ... on DiscountCodeBasic {
                     title
@@ -344,7 +345,7 @@ export const appWalletRequestWithdrawal = async (req, res) => {
       `,
         variables: {
           "basicCodeDiscount": {
-            "title": 'W_'+generateRandomCode(8),
+            "title": (customer.body.data.customer.id+"_discount").replace('gid://shopify/Customer/', ''),
             "code": 'W_'+generateRandomCode(8),
             "startsAt": currentDate.toISOString(),
             "customerSelection": {
@@ -371,6 +372,40 @@ export const appWalletRequestWithdrawal = async (req, res) => {
       },
     });
     if (couponQuery.body.data.discountCodeBasicCreate.codeDiscountNode) {
+      const metafieldsToCreate = []
+      metafieldsToCreate.push(
+        {
+          "key": "coupon_code_belongs_to",
+          "namespace": "mobile_app",
+          "ownerId": couponQuery.body.data.discountCodeBasicCreate.codeDiscountNode.id,
+          "type": "single_line_text_field",
+          "value": customer.body.data.customer.id+"_discount"
+        }
+      )
+      const metafieldsSet = await client.query({
+        data: {
+          "query": `mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+            metafieldsSet(metafields: $metafields) {
+              metafields {
+                key
+                namespace
+                value
+                createdAt
+                updatedAt
+              }
+              userErrors {
+                field
+                message
+                code
+              }
+            }
+          }`,
+          "variables": {
+            "metafields": metafieldsToCreate 
+          },
+        },
+      });
+      console.log(JSON.stringify(metafieldsSet.body))
       const codeDiscountNode = couponQuery.body.data.discountCodeBasicCreate.codeDiscountNode
       await database.WalletTransactions.create({
         shop: shop,

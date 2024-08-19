@@ -68,6 +68,19 @@ export const createOrderRest = async (req, res) => {
     order.shipping_lines.push(shipping_line)
   }
 
+  if (req.body.cart && req.body.cart.discountAllocations) {
+    req.body.cart.discountAllocations.forEach(discount => {
+      order.appliedDiscount = {
+        "amount": parseFloat(discount.discountedAmount.amount),
+        "title": discount.code,
+        "description": discount.code,
+        "value": parseFloat(discount.discountedAmount.amount),
+        "value_type": "fixed_amount",
+        "applicable": true,
+        "application_type": "discount_code"
+      }
+    });
+  }
 
   try {
     await order.save({
@@ -302,204 +315,11 @@ export const createCheckout = async (req, res) => {
   }
 }
 
-// export const calculateCheckout = async (req, res) => {
-//   const shop = process.env.SELECTED_SHOP
-//   const session = await shopify.config.sessionStorage.findSessionsByShop(process.env.SELECTED_SHOP)
-
-//   const client = new shopify.api.clients.Graphql({ session: session[0] })
-
-//   const ShopStoreFrontToken = await database.ShopStoreFrontToken.findOne({ where: { shop } })
-//   if (!ShopStoreFrontToken instanceof ShopStoreFrontTokenModel) {
-//     console.log('No method founded')
-//     return
-//   }
-
-//   const storefrontAccessToken = ShopStoreFrontToken.accessToken
-//   const storefrontClient = new shopify.api.clients.Storefront({
-//     domain: shop,
-//     storefrontAccessToken,
-//   })
-//   const customerAccessToken = req.headers.authorization
-//   const customer = await storefrontClient.query({
-//     data: `query {
-//     customer(customerAccessToken: "${customerAccessToken}") {
-//       id
-//       firstName
-//       lastName
-//       acceptsMarketing
-//       email
-//       phone
-//     }
-//   }`,
-//   })
-
-//   const address = {
-//     address1: req.body.address,
-//     city: req.body.city,
-//     country: 'PK',
-//     firstName: req.body.first_name,
-//     lastName: req.body.last_name,
-//     phone: req.body.phone,
-//     province: req.body.state,
-//     zip: req.body.zip,
-//   }
-
-//   const checkoutInput = {
-//     billingAddress: address,
-//     lineItems: [],
-//     shippingAddress: address,
-//     email: customer.body.data.customer.email,
-//     acceptAutomaticDiscounts: true,
-//   }
-
-//   JSON.parse(req.body.line_items).forEach((element) => {
-//     checkoutInput.lineItems.push({
-//       variantId: 'gid://shopify/ProductVariant/' + element.variantId,
-//       quantity: element.quantity,
-//     })
-//   })
-//   // checkoutInput.customer = customer.body.data.customer
-//   checkoutInput.marketRegionCountryCode = 'PK'
-//   checkoutInput.purchasingEntity = {
-//     customerId:customer.body.data.customer.id
-//   }
-
-//   if (req.body.appliedDiscount) {
-//     checkoutInput.appliedDiscount
-//     appliedDiscount
-//   }
-  
-//   try {
-//     const data = await client.query({
-//       data: {
-//         query: `mutation CalculateDraftOrder($input: DraftOrderInput!) {
-//           draftOrderCalculate(input: $input) {
-//             calculatedDraftOrder {
-//               billingAddressMatchesShippingAddress
-//               totalPriceSet {
-//                 presentmentMoney {
-//                   amount
-//                   currencyCode
-//                 }
-//                 shopMoney {
-//                   amount
-//                   currencyCode
-//                 }
-//               }
-//               lineItems {
-//                 appliedDiscount {
-//                   amountSet {
-//                     presentmentMoney {
-//                       amount
-//                       currencyCode
-//                     }
-//                     shopMoney {
-//                       amount
-//                       currencyCode
-//                     }
-//                   }
-//                   value
-//                   valueType
-//                   description
-//                 }
-//                 discountedTotalSet {
-//                   presentmentMoney {
-//                     amount
-//                     currencyCode
-//                   }
-//                   shopMoney {
-//                     amount
-//                     currencyCode
-//                   }
-//                 }
-//                 product {
-//                   id
-//                   title
-//                   totalVariants
-//                 }
-//                 quantity
-//                 requiresShipping
-//                 sku
-//                 taxable
-//                 title
-//                 variantTitle
-//                 variant {
-//                   id
-//                 }
-//                 weight {
-//                   value
-//                   unit
-//                 }
-//               }
-//               totalTaxSet {
-//                 presentmentMoney {
-//                   amount
-//                   currencyCode
-//                 }
-//                 shopMoney {
-//                   amount
-//                   currencyCode
-//                 }
-//               }
-//               totalDiscountsSet {
-//                 presentmentMoney {
-//                   amount
-//                   currencyCode
-//                 }
-//                 shopMoney {
-//                   amount
-//                   currencyCode
-//                 }
-//               }
-//               shippingLine {
-//                 id
-//                 custom
-//                 shippingRateHandle
-//                 title
-//                 originalPriceSet {
-//                   presentmentMoney {
-//                     amount
-//                     currencyCode
-//                   }
-//                   shopMoney {
-//                     amount
-//                     currencyCode
-//                   }
-//                 }
-//               }
-//               availableShippingRates {
-//                 handle
-//                 title
-//                 price {
-//                     amount
-//                 }
-//               }
-//               presentmentCurrencyCode
-//               marketName
-//               marketRegionCountryCode
-//             }
-//             userErrors {
-//               field
-//               message
-//             }
-//           }
-//         }`,
-//         variables: {
-//           input: checkoutInput,
-//         },
-//       },
-//     })
-//     console.log(data.body.data.draftOrderCalculate)
-//     res.json(data.body.data.draftOrderCalculate)
-//   } catch (error) {
-//     console.log(error)
-//     res.json(error)
-//   }
-// }
-
 export const calculateCheckout = async (req, res) => {
   const shop = process.env.SELECTED_SHOP
   const session = await shopify.config.sessionStorage.findSessionsByShop(process.env.SELECTED_SHOP)
+
+  const client = new shopify.api.clients.Graphql({ session: session[0] })
 
   const ShopStoreFrontToken = await database.ShopStoreFrontToken.findOne({ where: { shop } })
   if (!ShopStoreFrontToken instanceof ShopStoreFrontTokenModel) {
@@ -538,95 +358,143 @@ export const calculateCheckout = async (req, res) => {
   }
 
   const checkoutInput = {
-    "buyerIdentity": {
-      "countryCode": "PK",
-      "deliveryAddressPreferences": [
-        {
-          "deliveryAddress": address,
-          "deliveryAddressValidationStrategy": "COUNTRY_CODE_ONLY"
-        }
-      ],
-      "email": customer.body.data.customer.email
-    },
-    "lines": []
+    billingAddress: address,
+    lineItems: [],
+    shippingAddress: address,
+    email: customer.body.data.customer.email,
+    acceptAutomaticDiscounts: true,
   }
 
   JSON.parse(req.body.line_items).forEach((element) => {
-    checkoutInput.lines.push({
-      merchandiseId: 'gid://shopify/ProductVariant/' + element.variantId,
+    checkoutInput.lineItems.push({
+      variantId: 'gid://shopify/ProductVariant/' + element.variantId,
       quantity: element.quantity,
     })
   })
+  // checkoutInput.customer = customer.body.data.customer
+  checkoutInput.marketRegionCountryCode = 'PK'
+  checkoutInput.purchasingEntity = {
+    customerId:customer.body.data.customer.id
+  }
 
-  if (req.body.appliedDiscount) {
-    checkoutInput.discountCodes = [req.body.appliedDiscount]
+  if (req.body.cart && req.body.cart.discountAllocations) {
+    req.body.cart.discountAllocations.forEach(discount => {
+      checkoutInput.appliedDiscount = {
+        "description": discount.code,
+        "value": parseFloat(discount.discountedAmount.amount),
+        "valueType": "FIXED_AMOUNT"
+      }
+    });
   }
   
   try {
-    const cartCreate = await storefrontClient.query({
+    const data = await client.query({
       data: {
-        query: `mutation cartCreate($input: CartInput) {
-          cartCreate(input: $input) {
-            cart {
-              id
-              updatedAt
-              createdAt
-              buyerIdentity {
-                countryCode
-                email
-                phone
-                deliveryAddressPreferences {
-                  ... on MailingAddress {
-                    address1
-                    address2
-                    city
-                    company
-                    country
-                    firstName
-                    lastName
-                    province
-                    zip
-                  }
-                }
-              }
-              discountAllocations {
-                discountedAmount {
+        query: `mutation CalculateDraftOrder($input: DraftOrderInput!) {
+          draftOrderCalculate(input: $input) {
+            calculatedDraftOrder {
+              billingAddressMatchesShippingAddress
+              totalPriceSet {
+                presentmentMoney {
                   amount
                   currencyCode
                 }
-                ... on CartAutomaticDiscountAllocation {
-                  discountedAmount {
+                shopMoney {
+                  amount
+                  currencyCode
+                }
+              }
+              lineItems {
+                appliedDiscount {
+                  amountSet {
+                    presentmentMoney {
+                      amount
+                      currencyCode
+                    }
+                    shopMoney {
+                      amount
+                      currencyCode
+                    }
+                  }
+                  value
+                  valueType
+                  description
+                }
+                discountedTotalSet {
+                  presentmentMoney {
                     amount
                     currencyCode
                   }
+                  shopMoney {
+                    amount
+                    currencyCode
+                  }
+                }
+                product {
+                  id
                   title
+                  totalVariants
                 }
-                ... on CartCodeDiscountAllocation {
-                  discountedAmount {
+                quantity
+                requiresShipping
+                sku
+                taxable
+                title
+                variantTitle
+                variant {
+                  id
+                }
+                weight {
+                  value
+                  unit
+                }
+              }
+              totalTaxSet {
+                presentmentMoney {
+                  amount
+                  currencyCode
+                }
+                shopMoney {
+                  amount
+                  currencyCode
+                }
+              }
+              totalDiscountsSet {
+                presentmentMoney {
+                  amount
+                  currencyCode
+                }
+                shopMoney {
+                  amount
+                  currencyCode
+                }
+              }
+              shippingLine {
+                id
+                custom
+                shippingRateHandle
+                title
+                originalPriceSet {
+                  presentmentMoney {
+                    amount
+                    currencyCode
+                  }
+                  shopMoney {
                     amount
                     currencyCode
                   }
                 }
               }
-              totalQuantity
-              cost {
-                checkoutChargeAmount {
-                  amount
-                  currencyCode
-                }
-                subtotalAmount {
-                  amount
-                  currencyCode
-                }
-                totalAmount {
-                  amount
-                  currencyCode
-                }
-                totalTaxAmount {
-                  amount
-                  currencyCode
+              availableShippingRates {
+                handle
+                title
+                price {
+                    amount
                 }
               }
+              presentmentCurrencyCode
+              marketName
+              marketRegionCountryCode
             }
             userErrors {
               field
@@ -639,12 +507,7 @@ export const calculateCheckout = async (req, res) => {
         },
       },
     })
-
-
-    console.log(cartCreate.body)
-    console.log(cartCreate.body.data)
-
-    res.json(cartCreate.body.data.cartCreate)
+    res.json(data.body.data.draftOrderCalculate)
   } catch (error) {
     console.log(error)
     res.json(error)
