@@ -64,14 +64,16 @@ export const loginCustomer = async (req, res) => {
     returnResponse.customer = customerResponse.body.data.customer
 
     try {
-      console.log(returnResponse.customer)
       if (returnResponse.customer.phone) {
+        returnResponse.customer.phone = validateAndFormatPhoneNumber(returnResponse.customer.phone)
         const customerFromErp = await getCustomerFromERP(returnResponse.customer.phone)
         const erpCustomer = customerFromErp.data
+        returnResponse.customerInErp = erpCustomer
         returnResponse.existInErp = erpCustomer
         if (!erpCustomer) {
           const erpInsert = await insertCustomerInERP(returnResponse.customer.firstName, returnResponse.customer.lastName, returnResponse.customer.phone, returnResponse.customer.email);
           returnResponse.erpInsert = erpInsert.data
+          returnResponse.customerInErp = erpInsert.data
         }
       }
     } catch (error) {
@@ -106,7 +108,14 @@ export const signUpCustomer = async (req, res)=>{
   const shop = process.env.SELECTED_SHOP
   const ShopStoreFrontToken = await database.ShopStoreFrontToken.findOne({ where: { shop } })
   if (!ShopStoreFrontToken  instanceof ShopStoreFrontTokenModel) {
-    console.log('No method founded');
+    res.json({
+      success:false,
+      errors: {
+        "shop": [
+          "No Shop Founded"
+        ]
+      }
+    })
     return
   }
   const phoneNumber = validateAndFormatPhoneNumber(req.body.phoneNumber);
@@ -143,10 +152,13 @@ export const signUpCustomer = async (req, res)=>{
         success:false,
         errors:err
       })
-      return;
+      return
     })
     newCustomer = customer
   } catch(error) {
+    console.log(error)
+    console.log(JSON.stringify(error))
+    console.log(error.response)
     if (error.response && error.response.body) {
       err = err.response.body.errors
     }
@@ -154,14 +166,16 @@ export const signUpCustomer = async (req, res)=>{
       success:false,
       errors:error
     })
-    return;
+    return
   }
 
   let customerInErp = ""
 
   try {
-    customerInErp = await insertCustomerInERP(req.body.first_name, req.body.last_name, phoneNumber, req.body.email);
+    await insertCustomerInERP(req.body.first_name, req.body.last_name, phoneNumber, req.body.email);
   } catch (error) {
+    console.log(error)
+    console.log(JSON.stringify(error))
     console.log(error.response)
     if (error.response && error.response) {
       customerInErp = error.response
@@ -169,11 +183,9 @@ export const signUpCustomer = async (req, res)=>{
   }
   res.json({
     success:true,
-    "message":"Your account has been created! Please log in to start using our app.",
-    newCustomer,
-    customerInErp
+    "message":"Your account has been created! Please log in to start using our app."
   })
-  return;
+  return
 }
 
 export const requestForgetPassword = async (req, res)=>{
@@ -338,6 +350,7 @@ export const getCustomerPromoCodes = async (req, res) => {
       'success':true,
       'discountNodes': discountNodesResponse.body.data.discountNodes
     })
+    return
   } catch (error) {
     res.json({
       'success':false,
